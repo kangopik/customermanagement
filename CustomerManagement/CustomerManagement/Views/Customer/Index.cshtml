@@ -1,0 +1,363 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<ol class="breadcrumb">
+    <li class="active">Customer</li>
+</ol>
+
+<div class="panel-body">
+    <div id="page-wrapper">
+        <button class="btn btn-primary btn-xs" onclick="add()"><i class="fa fa-plus fa-fw"></i> Add Customer</button>
+        <button class="btn btn-info btn-xs" onclick="reload_table()"><i class="fa fa-refresh fa-fw"></i> Refresh</button>
+        <br />
+    </div>
+</div>
+
+<div style="width:90%; margin:0 auto;">
+    <table id="myTable" style="width:100%">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Company</th>
+                <th width="5%;">Edit</th>
+                <th width="5%;">Delete</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<style>
+    tr.even {
+        background-color: #F5F5F5 !important;
+    }
+</style>
+
+<!-- modal -->
+<div class="modal fade" id="modal_form" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+            </div>
+            <div class="modal-body form">
+                <form action="#" id="form" class="form-horizontal">
+                    <input name="CustomerID" id="CustomerID" type="hidden">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label class="control-label col-md-3">First Name</label>
+                            <div class="col-md-9">
+                                <input name="FirstName" id="FirstName"
+                                       placeholder="First Name" class="form-control required" type="text">
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Last Name</label>
+                            <div class="col-md-9">
+                                <input name="LastName" id="LastName"
+                                       placeholder="Last Name" class="form-control required" type="text">
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">DOB</label>
+                            <div class="col-md-3">
+                                <input name="DOB" id="DOB"
+                                       placeholder="DOB" class="form-control required" type="text" readonly>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Gender</label>
+                            <div class="col-md-3">
+                                <select class="form-control required" name="Gender" id="Gender">
+                                    <option value=''>-Select-</option>
+                                    <option value='0'>Male</option>
+                                    <option value='1'>Female</option>
+                                </select>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Phone Number</label>
+                            <div class="col-md-9">
+                                <input name="PhoneNumber" id="PhoneNumber"
+                                       placeholder="Phone Number" class="form-control required" type="text" onkeypress="return isNumberKey(event)">
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Email Address</label>
+                            <div class="col-md-9">
+                                <input name="EmailAddress" id="EmailAddress"
+                                       placeholder="Email Address" class="form-control required" type="email">
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">Company Name</label>
+                            <div class="col-md-9">
+                                <input name="CompanyName" id="CompanyName"
+                                       placeholder="Company Name" class="form-control required" type="text">
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" onclick="save()" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal -->
+
+@section Scripts{
+    <script>
+        var save_method;
+        var table;
+
+        $('#DOB').datepicker({
+            autoclose: true
+        })
+
+        $(document).ready(function () {
+            table = $('#myTable').DataTable({
+                "ajax": {
+                    "processing": true,
+                    "url": "/Customer/LoadCustomer",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columnDefs": [{
+                    "targets": [-1, -2],
+                    "orderable": false,
+                }],
+            });
+
+            $("input").change(function () {
+                $(this).parent().parent().removeClass('has-error');
+                $(this).next().empty();
+            });
+
+            $("select").change(function () {
+                $(this).parent().parent().removeClass('has-error');
+                $(this).next().empty();
+            });
+        });
+
+        function reload_table() {
+            table.ajax.reload(null, false);
+        }
+
+        function add() {
+            save_method = 'add';
+            $('#form')[0].reset();
+            $('.form-group').removeClass('has-error');
+            $('.help-block').empty();
+            $('#modal_form').modal('show');
+            $('.modal-title').text('Add Customer');
+            $('#FirstName').val('');
+            $('#LastName').val('');
+            $('#DOB').val('');
+            $('#Gender').val('');
+            $('#PhoneNumber').val('');
+            $('#EmailAddress').val('');
+            $('#CompanyName').val('');
+        }
+
+        function edit(id) {
+            save_method = 'update';
+            $('#form')[0].reset();
+            $('.form-group').removeClass('has-error');
+            $('.help-block').empty();
+            $('.modal-title').text('Edit Customer');
+
+            $.ajax({
+                url: "/Customer/EditCustomer/" + id,
+                type: "GET",
+                contentType: 'application/json; charset=utf-8',
+                dataType: "json",
+                success: function (data) {
+                    $('[name="CustomerID"]').val(data.CustomerID);
+                    $('[name="FirstName"]').val(data.FirstName);
+                    $('[name="LastName"]').val(data.LastName);
+                    $('[name="DOB"]').val(data.DOB);
+                    $('[select="Gender"]').val(data.Gender);
+                    var nm = "";
+                    if (data.Gender == 0) {
+                        nm = "Male";
+                    } else {
+                        nm = "Female";
+                    }
+                    var eid = document.getElementById('Gender');
+                    for (var i = 0; i < eid.options.length; ++i) {
+                        if (eid.options[i].text === nm)
+                            eid.options[i].selected = true;
+                    }
+                    $('[name="PhoneNumber"]').val(data.PhoneNumber);
+                    $('[name="EmailAddress"]').val(data.EmailAddress);
+                    $('[name="CompanyName"]').val(data.CompanyName);
+                    $('#modal_form').modal('show');
+                    $('.modal-title').text('Edit Customer');
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Error get data from ajax');
+                }
+            });
+        }
+
+        function save() {
+            var url;
+
+            if (save_method == 'add') {
+                url = "/Customer/AddCustomer";
+            } else {
+                url = "/Customer/UpdateCustomer";
+            }
+
+            var FirstName = $('#FirstName');
+            var LastName = $('#LastName');
+            var DOB = $('#DOB');
+            var Gender = $('#Gender');
+            var PhoneNumber = $('#PhoneNumber');
+            var EmailAddress = $('#EmailAddress');
+            var CompanyName = $('#CompanyName');
+
+            if (!FirstName.val()) {
+                FirstName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                FirstName.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+
+            if (!LastName.val()) {
+                LastName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                LastName.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+
+            if (!DOB.val()) {
+                DOB.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                DOB.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+
+            if (!Gender.val()) {
+                Gender.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                Gender.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+
+            if (!PhoneNumber.val()) {
+                PhoneNumber.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                PhoneNumber.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+
+            if (!EmailAddress.val()) {
+                EmailAddress.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                var email_regex = /^\b[A-Z0-9._%-]+@@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i;
+                if (!email_regex.test(EmailAddress.val()))
+                {
+                    EmailAddress.closest('.form-group').removeClass('has-success').addClass('has-error');
+                    e.preventDefault();
+                }else{
+                    EmailAddress.closest('.form-group').removeClass('has-error').addClass('has-success');
+                }
+            }
+
+            if (!CompanyName.val()) {
+                CompanyName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                CompanyName.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: $('#form').serialize(),
+                dataType: "JSON",
+                success: function (data) {
+
+                    if (data.status) {
+                        $('#modal_form').modal('hide');
+                        reload_table();
+                        if (save_method == 'add') {
+                            alertify.error("Success !, Add Customer ");
+                        } else {
+                            alertify.error("Success !, Update Customer ");
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < data.inputerror.length; i++) {
+                            $('[name="' + data.inputerror[i] + '"]').parent().parent().addClass('has-error');
+                            $('[name="' + data.inputerror[i] + '"]').next().text(data.error_string[i]);
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (save_method == 'add') {
+                        alertify.error("Failed !, Add Customer ");
+                    } else {
+                        alertify.error("Failed !, Update Customer ");
+                    }
+                }
+            });
+        }
+
+        function deletes(id) {
+            swal({
+                title: "Confirmation",
+                text: "Are you sure to Delete this data ?",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOnCancel: true,
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: "/Customer/DeleteCustomer/" + id,
+                            type: "POST",
+                            dataType: "JSON",
+                            success: function (data) {
+                                $('#modal_form').modal('hide');
+                                if (data.status) {
+                                    alertify.error("Success !, Delete Customer ");
+                                } else {
+                                    alertify.error("Failed !, Delete Customer ");
+                                }
+                                reload_table();
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                alertify.error("Failed !, Delete Customer ");
+                            }
+                        });
+                    }
+                });
+        }
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+    </script>
+}

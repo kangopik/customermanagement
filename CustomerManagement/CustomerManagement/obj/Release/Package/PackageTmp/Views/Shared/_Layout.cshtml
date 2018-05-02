@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>.: CUSTOMER MANAGEMENT :.</title>
+    @Styles.Render("~/Content/bootstrapcss")
+    @Styles.Render("~/Content/font-awesomecss")
+    @Styles.Render("~/Content/alertcss")
+    @Styles.Render("~/Content/datatablescss")
+    @Styles.Render("~/Content/datepickercss")
+    @Styles.Render("~/Content/maincss")
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">    
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <div class="wrapper">
+        <header class="main-header">
+            <a href="" class="logo">
+                <span class="logo-mini"><b>LIS</b></span>
+                <span class="logo-lg"><b>LIS</b></span>
+            </a>
+        </header>
+
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <ul class="sidebar-menu">
+                    <li class="treeview" id="mnHome">
+                        <a href="/Customer/Index">
+                            <i class="fa fa-users fa-fw"></i><span>Customer</span>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </aside>
+
+        <div class="content-wrapper">
+            @RenderBody()
+        </div>
+
+    </div>
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrapjs")
+    @Scripts.Render("~/bundles/alertjs")
+    @Scripts.Render("~/bundles/datatablesjs")
+    @Scripts.Render("~/bundles/datepickerjs")
+    @Scripts.Render("~/bundles/mainjs")
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>
